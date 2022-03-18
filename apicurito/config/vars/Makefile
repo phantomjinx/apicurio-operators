@@ -1,6 +1,9 @@
 CONTROLLER_GEN_VERSION := v0.4.1
 OPERATOR_SDK_VERSION := v1.21.0
 KUSTOMIZE_VERSION := v4.1.2
+OPM_VERSION := v1.19.5
+OPM_PKG := github.com/operator-framework/operator-registry
+SRC_CATALOG := registry.redhat.io/redhat/redhat-operator-index:v4.11
 
 PACKAGE := fuse-apicurito
 
@@ -51,7 +54,10 @@ MANIFESTS := manifests
 RBAC := rbac
 TIMESTAMP=$(shell date -u '+%F %T %Z')
 DOMAIN := apicur.io
+CATALOG := catalog
 
+
+CSV_NAME := $(PACKAGE).v$(VERSION)
 CSV_REPLACES := $(PACKAGE).v$(PREVIOUS_VERSION)
 CSV_FILENAME := $(PACKAGE).clusterserviceversion.yaml
 CSV_PATH := $(MANIFESTS)/bases/$(CSV_FILENAME)
