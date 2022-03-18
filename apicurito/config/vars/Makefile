@@ -62,6 +62,8 @@ CSV_REPLACES := $(PACKAGE).v$(PREVIOUS_VERSION)
 CSV_FILENAME := $(PACKAGE).clusterserviceversion.yaml
 CSV_PATH := $(MANIFESTS)/bases/$(CSV_FILENAME)
 
+RELATED_IMAGES_PATCH := $(MANAGER)/patches/related-images-patch.yaml
+
 #
 # Timestamp for the building of the operator
 #

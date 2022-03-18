@@ -182,6 +182,9 @@ pre-bundle:
 	@sed -i 's/^  displayName: .*/  displayName: $(CSV_DISPLAY_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH)
 	@sed -i 's/^  version: .*/  version: $(VERSION)/' $(CSV_PATH)
+# Update the related image patch
+	@sed -i '/RELATED_IMAGE_APICURITO/,/op: add/s~value: \(.*\):.*~value: \1:$(TAG)~' $(RELATED_IMAGES_PATCH)
+	@sed -i '/RELATED_IMAGE_GENERATOR/,/op: add/s~value: \(.*\):.*~value: \1:$(TAG)~' $(RELATED_IMAGES_PATCH)
 
 # Generate bundle manifests and metadata, then validate generated files.
 bundle: generate-crds kustomize pre-bundle
