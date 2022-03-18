@@ -17,8 +17,6 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/RHsyseng/operator-utils/pkg/resource"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -36,7 +34,7 @@ import (
 func apicuritoDeployment(c *configuration.Config, a *v1alpha1.Apicurito) (dep resource.KubernetesResource) {
 	// Define a new deployment
 	var dm int32 = 420
-	name := fmt.Sprintf("%s-%s", a.Name, "ui")
+	name := DefineUIName(a)
 	deployLabels := map[string]string{
 		"app":           "apicurito",
 		"component":     name,
@@ -135,7 +133,7 @@ func apicuritoDeployment(c *configuration.Config, a *v1alpha1.Apicurito) (dep re
 // Creates and returns a generator Deployment object
 func generatorDeployment(c *configuration.Config, a *v1alpha1.Apicurito) (dep resource.KubernetesResource) {
 	// Define a new deployment
-	name := fmt.Sprintf("%s-%s", a.Name, "generator")
+	name := DefineGeneratorName(a)
 	deployLabels := map[string]string{
 		"app":           "apicurito",
 		"component":     name,

@@ -17,8 +17,6 @@
 package resources
 
 import (
-	"fmt"
-
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/RHsyseng/operator-utils/pkg/resource"
@@ -35,7 +33,7 @@ var labels = map[string]string{"app": "apicurito"}
 func apicuritoService(a *v1alpha1.Apicurito) (s resource.KubernetesResource) {
 
 	// Define new service
-	name := fmt.Sprintf("%s-%s", a.Name, "ui")
+	name := DefineUIName(a)
 	s = &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
@@ -70,15 +68,16 @@ func apicuritoService(a *v1alpha1.Apicurito) (s resource.KubernetesResource) {
 }
 
 func generatorService(a *v1alpha1.Apicurito) (s resource.KubernetesResource) {
+	name := DefineGeneratorName(a)
 	s = &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
 			Kind:       "Service",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s", a.Name, "generator"),
+			Name:      name,
 			Namespace: a.Namespace,
-			Labels:    labelComponent("apicurito-service-generator"),
+			Labels:    labelComponent(name),
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(a, schema.GroupVersionKind{
 					Group:   v1alpha1.SchemeGroupVersion.Group,
@@ -89,7 +88,7 @@ func generatorService(a *v1alpha1.Apicurito) (s resource.KubernetesResource) {
 		},
 		Spec: corev1.ServiceSpec{
 			Type:     corev1.ServiceTypeClusterIP,
-			Selector: labelComponent("apicurito-service-generator"),
+			Selector: labelComponent(name),
 			Ports: []corev1.ServicePort{
 				{
 					Name:       "http",

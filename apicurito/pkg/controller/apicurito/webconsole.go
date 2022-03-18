@@ -5,6 +5,8 @@ package apicurito
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/RHsyseng/operator-utils/pkg/logs"
 	"github.com/RHsyseng/operator-utils/pkg/utils/kubernetes"
 	"github.com/RHsyseng/operator-utils/pkg/utils/openshift"
@@ -19,7 +21,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"strings"
 )
 
 var logu = logs.GetLogger("openshift-webconsole")
@@ -48,8 +49,8 @@ func doDeleteConsoleLink(consoleLinkName string, c client.Client, api *v1alpha1.
 }
 
 func createConsoleLink(c client.Client, api *v1alpha1.Apicurito) {
-	doCreateConsoleLink(getUIConsoleLinkName(api), resources.GetUIRouteName(api), c, api)
-	doCreateConsoleLink(getGeneratorConsoleLinkName(api), resources.GetGeneratorRouteName(api), c, api)
+	doCreateConsoleLink(getUIConsoleLinkName(api), resources.DefineUIName(api), c, api)
+	doCreateConsoleLink(getGeneratorConsoleLinkName(api), resources.DefineGeneratorName(api), c, api)
 }
 
 func doCreateConsoleLink(consoleLinkName string, routeName string, c client.Client, api *v1alpha1.Apicurito) {
@@ -77,7 +78,7 @@ func checkConsoleLink(route *routev1.Route, consoleLinkName string, api *v1alpha
 
 func reconcileConsoleLink(ctx context.Context, route *routev1.Route, link *consolev1.ConsoleLink, client client.Client) {
 	url := "https://" + route.Spec.Host
-	linkTxt := ConsoleLinkText(route)
+	linkTxt := consoleLinkText(route)
 	if url != link.Spec.Href || linkTxt != link.Spec.Text {
 		if err := client.Update(ctx, link); err != nil {
 			logu.Error(err, "failed to reconcile Console Link", link)
@@ -86,14 +87,14 @@ func reconcileConsoleLink(ctx context.Context, route *routev1.Route, link *conso
 }
 
 func getUIConsoleLinkName(api *v1alpha1.Apicurito) string {
-	return fmt.Sprintf("%s-%s", resources.GetUIRouteName(api), api.Namespace)
+	return fmt.Sprintf("%s-%s", resources.DefineUIName(api), api.Namespace)
 }
 
 func getGeneratorConsoleLinkName(api *v1alpha1.Apicurito) string {
-	return fmt.Sprintf("%s-%s", resources.GetGeneratorRouteName(api), api.Namespace)
+	return fmt.Sprintf("%s-%s", resources.DefineGeneratorName(api), api.Namespace)
 }
 
-func ConsoleLinkText(route *routev1.Route) string {
+func consoleLinkText(route *routev1.Route) string {
 	name := route.Name
 	name = strings.ToLower(name)
 	name = strings.ReplaceAll(name, "-", "")
@@ -113,7 +114,7 @@ func createNamespaceDashboardLink(consoleLinkname string, route *routev1.Route, 
 		},
 		Spec: consolev1.ConsoleLinkSpec{
 			Link: consolev1.Link{
-				Text: ConsoleLinkText(route),
+				Text: consoleLinkText(route),
 				Href: "https://" + route.Spec.Host,
 			},
 			Location: consolev1.NamespaceDashboard,
