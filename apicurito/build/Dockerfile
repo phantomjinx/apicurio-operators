@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi7-dev-preview/ubi-minimal:7.6
+FROM registry.redhat.io/ubi8/ubi-minimal
 
 ENV OPERATOR=/usr/local/bin/apicurito \
     USER_UID=1001 \
