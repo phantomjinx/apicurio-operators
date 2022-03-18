@@ -119,6 +119,24 @@ else
 KUSTOMIZE=$(shell command -v kustomize 2> /dev/null)
 endif
 
+opm:
+ifeq (, $(shell command -v opm 2> /dev/null))
+	@{ \
+	set -e ;\
+	OPM_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$OPM_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get \
+		-ldflags '-w -extldflags "-static"' -tags "json1" \
+		-ldflags "-X '$(OPM_PKG)/cmd/opm/version.opmVersion=$(OPM_VERSION)' -X '$(OPM_PKG)/cmd/opm/version.buildDate=$(BUILD_TIME)'" \
+		$(OPM_PKG)/cmd/opm@$(OPM_VERSION) ;\
+	rm -rf $$OPM_GEN_TMP_DIR ;\
+	}
+OPM=$(GOBIN)/opm
+else
+OPM=$(shell command -v opm 2> /dev/null)
+endif
+
 operator-sdk:
 ifeq (, $(shell command -v operator-sdk 2> /dev/null))
 	@{ \
@@ -160,7 +178,7 @@ pre-bundle:
 	@sed -i 's~^    containerImage: .*~    containerImage: $(IMAGE):$(TAG)~' $(CSV_PATH)
 	@sed -i 's/^    support: .*/    support: $(CSV_SUPPORT)/' $(CSV_PATH)
 	@sed -i "s/^    olm.skipRange: .*/    olm.skipRange: '>=7.7.0 <$(VERSION)'/" $(CSV_PATH)
-	@sed -i 's/^  name: .*.\(v.*\)/  name: $(PACKAGE).v$(VERSION)/' $(CSV_PATH)
+	@sed -i 's/^  name: .*.\(v.*\)/  name: $(CSV_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  displayName: .*/  displayName: $(CSV_DISPLAY_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH)
 	@sed -i 's/^  version: .*/  version: $(VERSION)/' $(CSV_PATH)
@@ -195,6 +213,17 @@ bundle: generate-crds kustomize pre-bundle
 .PHONY: bundle-build
 bundle-build: bundle
 	cd bundle && docker build -f Dockerfile -t $(BUNDLE_IMG) .
+
+.PHONY: bundle-push
+bundle-push: bundle-build
+	docker push $(BUNDLE_IMG)
+
+.PHONY: catalog
+catalog: opm bundle-build
+	SRC_CATALOG=$(SRC_CATALOG) CATALOG_DIR=$(CATALOG) \
+	OPM=$(OPM) BUNDLE_IMAGE=$(BUNDLE_IMG) CSV_NAME=$(CSV_NAME) \
+	CSV_REPLACES=$(CSV_REPLACES) CHANNEL=$(DEFAULT_CHANNEL) \
+	PACKAGE=$(PACKAGE) ./script/build-catalog.sh
 
 clean:
 	@find . -name "*.gen.*" -delete
