@@ -4,24 +4,17 @@ go 1.13
 
 require (
 	github.com/RHsyseng/operator-utils v0.0.0-20200506183821-e3b4a2ba9c30
-	github.com/blang/semver v3.5.1+incompatible
-	github.com/coreos/prometheus-operator v0.35.1
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-logr/logr v0.1.0
 	github.com/go-openapi/spec v0.19.6
 	github.com/gobuffalo/packr/v2 v2.7.1
-	github.com/heroku/docker-registry-client v0.0.0-20190909225348-afc9e1acc3d5
 	github.com/imdario/mergo v0.3.8
 	github.com/openshift/api v3.9.1-0.20190924102528-32369d4db2ad+incompatible
-	github.com/operator-framework/operator-lifecycle-manager v0.0.0-20191115003340-16619cd27fa5
 	github.com/operator-framework/operator-sdk v0.15.0
 	github.com/prometheus/client_golang v1.2.1
 	github.com/rogpeppe/go-internal v1.5.0 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
-	github.com/tidwall/gjson v1.6.0 // indirect
-	github.com/tidwall/sjson v1.0.4
-	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/api v0.17.2
 	k8s.io/apiextensions-apiserver v0.17.0 // indirect
 	k8s.io/apimachinery v0.17.2
