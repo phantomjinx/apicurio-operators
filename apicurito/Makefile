@@ -1,3 +1,14 @@
+CONFIG_DIR := ./config
+
+# User customisable variables
+include $(CONFIG_DIR)/vars/Makefile
+
+ifeq (, $(shell command -v git 2> /dev/null))
+GIT_COMMIT=$(shell git rev-list -1 HEAD)
+else
+GIT_COMMIT=release-$(VERSION)
+endif
+
 # kernel-style V=1 build verbosity
 ifeq ("$(origin V)", "command line")
        BUILD_VERBOSE = $(V)
@@ -42,8 +53,13 @@ lint:
 
 .PHONY: build
 build:
-	./scripts/go-build.sh
-
+	@(./scripts/go-build.sh \
+		-b $(BUILD_TIME) \
+		-g $(GIT_COMMIT) \
+		-i $(IMAGE) \
+		-p $(PREVIOUS_VERSION) \
+		-t $(TAG) \
+		-v $(VERSION))
 
 .PHONY: clean
 clean:
