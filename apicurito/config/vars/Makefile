@@ -32,7 +32,7 @@ NAMESPACE ?= $(DEFAULT_NAMESPACE)
 
 CHANNELS ?= $(DEFAULT_CHANNEL)
 # Default bundle image tag
-BUNDLE_IMG ?= $(IMAGE)-$(BUNDLE_INFIX):$(VERSION)
+BUNDLE_IMG ?= $(IMAGE)-$(BUNDLE_INFIX):$(TAG)
 # Options for 'bundle-build'
 ifneq ($(origin CHANNELS), undefined)
 BUNDLE_CHANNELS := --channels=$(CHANNELS)
@@ -57,6 +57,11 @@ DOMAIN := apicur.io
 CSV_REPLACES := $(PACKAGE).v$(PREVIOUS_VERSION)
 CSV_FILENAME := $(PACKAGE).clusterserviceversion.yaml
 CSV_PATH := $(MANIFESTS)/bases/$(CSV_FILENAME)
+
+#
+# Timestamp for the building of the operator
+#
+BUILD_TIME := $(shell date +%Y-%m-%dT%H:%M:%S%z)
 
 TMPL := tmpl
 YAML := yaml
