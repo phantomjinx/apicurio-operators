@@ -1,8 +1,7 @@
 CONTROLLER_GEN_VERSION := v0.4.1
 OPERATOR_SDK_VERSION := v1.21.0
 KUSTOMIZE_VERSION := v4.1.2
-OPM_VERSION := v1.19.5
-OPM_PKG := github.com/operator-framework/operator-registry
+OPM_VERSION := v1.21.0
 SRC_CATALOG := registry.redhat.io/redhat/redhat-operator-index:v4.11
 
 PACKAGE := fuse-apicurito

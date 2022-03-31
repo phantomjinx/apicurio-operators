@@ -121,17 +121,7 @@ endif
 
 opm:
 ifeq (, $(shell command -v opm 2> /dev/null))
-	@{ \
-	set -e ;\
-	OPM_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$OPM_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get \
-		-ldflags '-w -extldflags "-static"' -tags "json1" \
-		-ldflags "-X '$(OPM_PKG)/cmd/opm/version.opmVersion=$(OPM_VERSION)' -X '$(OPM_PKG)/cmd/opm/version.buildDate=$(BUILD_TIME)'" \
-		$(OPM_PKG)/cmd/opm@$(OPM_VERSION) ;\
-	rm -rf $$OPM_GEN_TMP_DIR ;\
-	}
+	@OPM_VERSION=$(OPM_VERSION) ./script/build-install-opm.sh
 OPM=$(GOBIN)/opm
 else
 OPM=$(shell command -v opm 2> /dev/null)
@@ -222,7 +212,7 @@ bundle-push: bundle-build
 	docker push $(BUNDLE_IMG)
 
 .PHONY: catalog
-catalog: opm bundle-build
+catalog: opm bundle-push
 	SRC_CATALOG=$(SRC_CATALOG) CATALOG_DIR=$(CATALOG) \
 	OPM=$(OPM) BUNDLE_IMAGE=$(BUNDLE_IMG) CSV_NAME=$(CSV_NAME) \
 	CSV_REPLACES=$(CSV_REPLACES) CHANNEL=$(DEFAULT_CHANNEL) \
