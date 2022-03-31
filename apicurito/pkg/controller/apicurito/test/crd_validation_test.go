@@ -1,15 +1,16 @@
 package test
 
 import (
-	"github.com/RHsyseng/operator-utils/pkg/validation"
-	"github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1alpha1"
-	"github.com/ghodss/yaml"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/RHsyseng/operator-utils/pkg/validation"
+	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
+	"github.com/ghodss/yaml"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSampleCustomResources(t *testing.T) {
@@ -27,12 +28,14 @@ func TestSampleCustomResources(t *testing.T) {
 
 func TestTrialEnvMinimum(t *testing.T) {
 	var inputYaml = `
-apiVersion: apicur.io/v1alpha1
+apiVersion: apicur.io/v1
 kind: Apicurito
 metadata:
   name: trial
 spec:
   size: 3
+  uiRouteHostname: apicurito-ui.example.com
+  generatorRouteHostname: apicurito-generator.example.com
 `
 	var input map[string]interface{}
 	assert.NoError(t, yaml.Unmarshal([]byte(inputYaml), &input))
@@ -43,7 +46,7 @@ spec:
 
 func TestCompleteCRD(t *testing.T) {
 	schema := getSchema(t)
-	missingEntries := schema.GetMissingEntries(&v1alpha1.Apicurito{})
+	missingEntries := schema.GetMissingEntries(&api.Apicurito{})
 
 	// The size is not expected to be used and is not fully defined TODO: verify
 	var meSize *validation.SchemaEntry = nil

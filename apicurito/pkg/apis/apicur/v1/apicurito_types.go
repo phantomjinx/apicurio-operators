@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package v1alpha1
+package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,10 +26,22 @@ import (
 // ApicuritoSpec defines the desired state of Apicurito
 // +k8s:openapi-gen=true
 type ApicuritoSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Size"
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:number"
 	Size int32 `json:"size"`
+
+	// The external hostname to access the UI service
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Application Route Host Name"
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:text"
+	UIRouteHostname string `json:"uiRouteHostname,omitempty"`
+
+	// The external hostname to access the generator service
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Generator Route Host Name"
+	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:text"
+	GeneratorRouteHostname string `json:"generatorRouteHostname,omitempty"`
 }
 
 // ApicuritoStatus defines the observed state of Apicurito
@@ -46,7 +58,7 @@ type ApicuritoStatus struct {
 // +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
 // +kubebuilder:object:root=true
-// +kubebuilder:deprecatedversion
+// +kubebuilder:storageversion
 // +kubebuilder:resource:path=apicuritoes,scope=Namespaced
 // +operator-sdk:csv:customresourcedefinitions:displayName="Apicurito"
 // +operator-sdk:csv:customresourcedefinitions:resources={{ServiceAccount,v1},{ClusterRole,rbac.authorization.k8s.io/v1},{Role,rbac.authorization.k8s.io/v1},{Deployment,apps/v1}}

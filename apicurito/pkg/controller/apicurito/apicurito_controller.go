@@ -37,7 +37,7 @@ import (
 
 	"github.com/apicurio/apicurio-operators/apicurito/pkg/resources"
 
-	"github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1alpha1"
+	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
 
 	"github.com/apicurio/apicurio-operators/apicurito/pkg/configuration"
 
@@ -84,7 +84,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Apicurito
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Apicurito{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &api.Apicurito{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource Pods and requeue the owner Apicurito
 	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &v1alpha1.Apicurito{},
+		OwnerType:    &api.Apicurito{},
 	})
 	if err != nil {
 		return err
@@ -122,7 +122,7 @@ func (r *ReconcileApicurito) Reconcile(request reconcile.Request) (reconcile.Res
 	reqLogger.Info("Reconciling Apicurito.")
 
 	// Fetch the Apicurito instance
-	apicurito := &v1alpha1.Apicurito{}
+	apicurito := &api.Apicurito{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, apicurito)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -206,7 +206,7 @@ func (r *ReconcileApicurito) Reconcile(request reconcile.Request) (reconcile.Res
 	}, nil
 }
 
-func (r *ReconcileApicurito) applyResources(apicurito *v1alpha1.Apicurito, res []resource.KubernetesResource, logger logr.Logger) (err error) {
+func (r *ReconcileApicurito) applyResources(apicurito *api.Apicurito, res []resource.KubernetesResource, logger logr.Logger) (err error) {
 	deployed, err := getDeployedResources(apicurito, r.client)
 
 	requested := compare.NewMapBuilder().Add(res...).ResourceMap()
@@ -241,7 +241,7 @@ func (r *ReconcileApicurito) applyResources(apicurito *v1alpha1.Apicurito, res [
 	return
 }
 
-func getDeployedResources(cr *v1alpha1.Apicurito, client client.Client) (map[reflect.Type][]resource.KubernetesResource, error) {
+func getDeployedResources(cr *api.Apicurito, client client.Client) (map[reflect.Type][]resource.KubernetesResource, error) {
 	var log = logf.Log.WithName("getDeployedResources")
 
 	reader := read.New(client).WithNamespace(cr.Namespace).WithOwnerObject(cr)

@@ -24,7 +24,7 @@ import (
 
 	"github.com/imdario/mergo"
 
-	"github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1alpha1"
+	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -37,11 +37,11 @@ type Config struct {
 }
 
 type ConfigLoader interface {
-	Config(apicurito *v1alpha1.Apicurito) error
+	Config(apicurito *api.Apicurito) error
 }
 
 // Returns all processed configuration for Apicurito
-func (c *Config) Config(apicurito *v1alpha1.Apicurito) error {
+func (c *Config) Config(apicurito *api.Apicurito) error {
 	if err := c.loadFromFile(ConfigFile); err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (c *Config) loadFromFile(config string) (err error) {
 }
 
 // From apicurito CR, Unmarshal it into a property object
-func (c *Config) setPropertiesFromApi(apicurito *v1alpha1.Apicurito) (err error) {
+func (c *Config) setPropertiesFromApi(apicurito *api.Apicurito) (err error) {
 	if apicurito != nil {
 		cApi := &Config{}
 		jsonProperties, err := json.Marshal(apicurito.Spec)

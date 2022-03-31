@@ -23,14 +23,14 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1alpha1"
+	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var labels = map[string]string{"app": "apicurito"}
 
-func apicuritoService(a *v1alpha1.Apicurito) (s resource.KubernetesResource) {
+func apicuritoService(a *api.Apicurito) (s resource.KubernetesResource) {
 
 	// Define new service
 	name := DefineUIName(a)
@@ -45,8 +45,8 @@ func apicuritoService(a *v1alpha1.Apicurito) (s resource.KubernetesResource) {
 			Labels:    labelComponent(name),
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(a, schema.GroupVersionKind{
-					Group:   v1alpha1.SchemeGroupVersion.Group,
-					Version: v1alpha1.SchemeGroupVersion.Version,
+					Group:   api.SchemeGroupVersion.Group,
+					Version: api.SchemeGroupVersion.Version,
 					Kind:    a.Kind,
 				}),
 			},
@@ -67,7 +67,7 @@ func apicuritoService(a *v1alpha1.Apicurito) (s resource.KubernetesResource) {
 	return
 }
 
-func generatorService(a *v1alpha1.Apicurito) (s resource.KubernetesResource) {
+func generatorService(a *api.Apicurito) (s resource.KubernetesResource) {
 	name := DefineGeneratorName(a)
 	s = &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
@@ -80,8 +80,8 @@ func generatorService(a *v1alpha1.Apicurito) (s resource.KubernetesResource) {
 			Labels:    labelComponent(name),
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(a, schema.GroupVersionKind{
-					Group:   v1alpha1.SchemeGroupVersion.Group,
-					Version: v1alpha1.SchemeGroupVersion.Version,
+					Group:   api.SchemeGroupVersion.Group,
+					Version: api.SchemeGroupVersion.Version,
 					Kind:    a.Kind,
 				}),
 			},

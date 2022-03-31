@@ -10,7 +10,7 @@ import (
 	"github.com/RHsyseng/operator-utils/pkg/logs"
 	"github.com/RHsyseng/operator-utils/pkg/utils/kubernetes"
 	"github.com/RHsyseng/operator-utils/pkg/utils/openshift"
-	"github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1alpha1"
+	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
 	"github.com/apicurio/apicurio-operators/apicurito/pkg/resources"
 	"github.com/ghodss/yaml"
 	"github.com/gobuffalo/packr/v2"
@@ -30,12 +30,12 @@ func consoleLinkExists() error {
 	return kubernetes.CustomResourceDefinitionExists(gvk)
 }
 
-func removeConsoleLink(c client.Client, api *v1alpha1.Apicurito) {
+func removeConsoleLink(c client.Client, api *api.Apicurito) {
 	doDeleteConsoleLink(getUIConsoleLinkName(api), c, api)
 	doDeleteConsoleLink(getGeneratorConsoleLinkName(api), c, api)
 }
 
-func doDeleteConsoleLink(consoleLinkName string, c client.Client, api *v1alpha1.Apicurito) {
+func doDeleteConsoleLink(consoleLinkName string, c client.Client, api *api.Apicurito) {
 	consoleLink := &consolev1.ConsoleLink{}
 	err := c.Get(context.TODO(), types.NamespacedName{Name: consoleLinkName}, consoleLink)
 	if err == nil && consoleLink != nil {
@@ -48,12 +48,12 @@ func doDeleteConsoleLink(consoleLinkName string, c client.Client, api *v1alpha1.
 	}
 }
 
-func createConsoleLink(c client.Client, api *v1alpha1.Apicurito) {
+func createConsoleLink(c client.Client, api *api.Apicurito) {
 	doCreateConsoleLink(getUIConsoleLinkName(api), resources.DefineUIName(api), c, api)
 	doCreateConsoleLink(getGeneratorConsoleLinkName(api), resources.DefineGeneratorName(api), c, api)
 }
 
-func doCreateConsoleLink(consoleLinkName string, routeName string, c client.Client, api *v1alpha1.Apicurito) {
+func doCreateConsoleLink(consoleLinkName string, routeName string, c client.Client, api *api.Apicurito) {
 	route := &routev1.Route{}
 	err := c.Get(context.TODO(), types.NamespacedName{Name: routeName, Namespace: api.Namespace}, route)
 	if err == nil && route != nil {
@@ -61,7 +61,7 @@ func doCreateConsoleLink(consoleLinkName string, routeName string, c client.Clie
 	}
 }
 
-func checkConsoleLink(route *routev1.Route, consoleLinkName string, api *v1alpha1.Apicurito, c client.Client) {
+func checkConsoleLink(route *routev1.Route, consoleLinkName string, api *api.Apicurito, c client.Client) {
 	consoleLink := &consolev1.ConsoleLink{}
 	err := c.Get(context.TODO(), types.NamespacedName{Name: consoleLinkName}, consoleLink)
 	if err != nil && apierrors.IsNotFound(err) {
@@ -86,11 +86,11 @@ func reconcileConsoleLink(ctx context.Context, route *routev1.Route, link *conso
 	}
 }
 
-func getUIConsoleLinkName(api *v1alpha1.Apicurito) string {
+func getUIConsoleLinkName(api *api.Apicurito) string {
 	return fmt.Sprintf("%s-%s", resources.DefineUIName(api), api.Namespace)
 }
 
-func getGeneratorConsoleLinkName(api *v1alpha1.Apicurito) string {
+func getGeneratorConsoleLinkName(api *api.Apicurito) string {
 	return fmt.Sprintf("%s-%s", resources.DefineGeneratorName(api), api.Namespace)
 }
 
@@ -104,7 +104,7 @@ func consoleLinkText(route *routev1.Route) string {
 	return "Apicurito - " + name
 }
 
-func createNamespaceDashboardLink(consoleLinkname string, route *routev1.Route, api *v1alpha1.Apicurito) *consolev1.ConsoleLink {
+func createNamespaceDashboardLink(consoleLinkname string, route *routev1.Route, api *api.Apicurito) *consolev1.ConsoleLink {
 	return &consolev1.ConsoleLink{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: consoleLinkname,
@@ -143,7 +143,7 @@ func createConsoleYAMLSamples(c client.Client) {
 			logu.Info("yaml", " name: ", filename, " not created:  ", err.Error())
 			continue
 		}
-		apicurito := v1alpha1.Apicurito{}
+		apicurito := api.Apicurito{}
 		err = yaml.Unmarshal([]byte(yamlStr), &apicurito)
 		if err != nil {
 			logu.Info("yaml", " name: ", filename, " not created:  ", err.Error())

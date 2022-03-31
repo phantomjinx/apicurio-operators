@@ -27,13 +27,13 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1alpha1"
+	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func apicuritoConfig(client client.Client, a *v1alpha1.Apicurito) (c resource.KubernetesResource, err error) {
+func apicuritoConfig(client client.Client, a *api.Apicurito) (c resource.KubernetesResource, err error) {
 	c = &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: DefineUIName(a),
@@ -63,8 +63,8 @@ func apicuritoConfig(client client.Client, a *v1alpha1.Apicurito) (c resource.Ku
 			Labels:    labels,
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(a, schema.GroupVersionKind{
-					Group:   v1alpha1.SchemeGroupVersion.Group,
-					Version: v1alpha1.SchemeGroupVersion.Version,
+					Group:   api.SchemeGroupVersion.Group,
+					Version: api.SchemeGroupVersion.Version,
 					Kind:    a.Kind,
 				}),
 			},

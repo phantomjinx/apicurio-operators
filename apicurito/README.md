@@ -34,15 +34,19 @@ apicurito-operator       1         1         1            1           1m
 ```
 
 ## Start an apicurito deployment
-Edit the example Apicurito CR at config/samples/apicur_v1alpha1_apicurito_cr.yaml:
+Edit the example Apicurito CR at config/samples/apicur_v1_apicurito_cr.yaml:
 ```
-$ cat config/samples/apicur_v1alpha1_apicurito_cr.yaml
-apiVersion: apicur.io/v1alpha1
+$ cat config/samples/apicur_v1_apicurito_cr.yaml
+apiVersion: apicur.io/v1
 kind: Apicurito
 metadata:
   name: apicurito-service
 spec:
   size: 3
+  # Customizable UI Route Hostname - uncomment if required
+#  uiRouteHostname: "apicurito-ui.example.com"
+  # Customizable Generator Route Hostname - uncomment if required
+#  generatorRouteHostname: "apicurito-generator.example.com"
 
 $ make -C config app
 ```

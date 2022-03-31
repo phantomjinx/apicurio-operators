@@ -34,7 +34,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/apicurio/apicurio-operators/apicurito/pkg/apis"
-	"github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1alpha1"
+	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
 	"github.com/apicurio/apicurio-operators/apicurito/pkg/configuration"
 	"github.com/apicurio/apicurio-operators/apicurito/pkg/controller"
 	routev1 "github.com/openshift/api/route/v1"
@@ -164,7 +164,7 @@ func (o *options) run() error {
 	}
 
 	// Setup metrics. Serves Operator/CustomResource GVKs and generates metrics based on those types
-	installationGVK := []schema.GroupVersionKind{v1alpha1.SchemaGroupVersionKind}
+	installationGVK := []schema.GroupVersionKind{api.SchemaGroupVersionKind}
 
 	// To generate metrics in other namespaces, add the values below.
 	ns := []string{namespace}

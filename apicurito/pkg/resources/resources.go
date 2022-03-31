@@ -20,14 +20,14 @@ import (
 	"github.com/RHsyseng/operator-utils/pkg/resource"
 	"github.com/go-logr/logr"
 
-	"github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1alpha1"
+	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
 	"github.com/apicurio/apicurio-operators/apicurito/pkg/configuration"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Resource struct {
 	Client    client.Client
-	Apicurito *v1alpha1.Apicurito
+	Apicurito *api.Apicurito
 	Cfg       *configuration.Config
 	Logger    logr.Logger
 }

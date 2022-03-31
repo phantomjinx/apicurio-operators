@@ -78,9 +78,11 @@ rules:
   - route.openshift.io
   resources:
   - routes
+  - routes/custom-host
   verbs:
   - get
   - list
   - create
   - update
   - watch
+  - patch

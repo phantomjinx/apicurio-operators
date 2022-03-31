@@ -13,27 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package resources
-
-import (
-	"fmt"
-
-	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
-)
-
-// DefineGeneratorName
-// Define the name of the generator pod
-func DefineGeneratorName(a *api.Apicurito) string {
-	return defineResourceName(a, "generator")
-}
-
-// DefineUIName
-// Define the name of the UI pod
-func DefineUIName(a *api.Apicurito) string {
-	return defineResourceName(a, "ui")
-}
-
-func defineResourceName(a *api.Apicurito, suffix string) string {
-	return fmt.Sprintf("%s-%s", a.Name, suffix)
-}

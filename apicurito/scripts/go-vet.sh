@@ -2,8 +2,17 @@
 
 if [[ -z ${CI} ]]; then
     if hash openapi-gen 2>/dev/null; then
-        openapi-gen --logtostderr=true -o "" \
-            -i ./pkg/apis/apicur/v1alpha1 -O zz_generated.openapi -p ./pkg/apis/apicur/v1alpha1
+      for version in `find pkg/apis/apicur -maxdepth 1 -mindepth 1 -type d -printf "%f\n"`
+      do
+          echo "Generating api for ${version} ..."
+          openapi-gen --logtostderr=true -o "" \
+              --go-header-file ./boilerplate/boilerplate.go.txt \
+              -i ./pkg/apis/apicur/${version} -O zz_generated.openapi -p ./pkg/apis/apicur/${version}
+          if [ $? != 0 ]; then
+              echo "Error: openapi-gen failed to generate the API"
+              exit 1
+          fi
+      done
     else
         echo "skipping go openapi generation"
     fi
