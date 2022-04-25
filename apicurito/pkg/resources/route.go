@@ -27,9 +27,17 @@ import (
 
 func generatorRoute(a *api.Apicurito) (r resource.KubernetesResource) {
 
-	hostname := a.Spec.GeneratorRouteHostname
-	if len(hostname) == 0 {
-		hostname = DefineGeneratorName(a)
+	routeSpec := routev1.RouteSpec{
+		Path: "/api/v1",
+		TLS:  &routev1.TLSConfig{Termination: routev1.TLSTerminationEdge},
+		To: routev1.RouteTargetReference{
+			Kind: "Service",
+			Name: DefineGeneratorName(a),
+		},
+	}
+
+	if len(a.Spec.GeneratorRouteHostname) > 0 {
+		routeSpec.Host = a.Spec.GeneratorRouteHostname
 	}
 
 	r = &routev1.Route{
@@ -49,15 +57,7 @@ func generatorRoute(a *api.Apicurito) (r resource.KubernetesResource) {
 				}),
 			},
 		},
-		Spec: routev1.RouteSpec{
-			Host: hostname,
-			Path: "/api/v1",
-			TLS:  &routev1.TLSConfig{Termination: routev1.TLSTerminationEdge},
-			To: routev1.RouteTargetReference{
-				Kind: "Service",
-				Name: DefineGeneratorName(a),
-			},
-		},
+		Spec: routeSpec,
 	}
 
 	return
@@ -65,9 +65,16 @@ func generatorRoute(a *api.Apicurito) (r resource.KubernetesResource) {
 
 func apicuritoRoute(a *api.Apicurito) (r resource.KubernetesResource) {
 
-	hostname := a.Spec.UIRouteHostname
-	if len(hostname) == 0 {
-		hostname = DefineUIName(a)
+	routeSpec := routev1.RouteSpec{
+		TLS: &routev1.TLSConfig{Termination: routev1.TLSTerminationEdge},
+		To: routev1.RouteTargetReference{
+			Kind: "Service",
+			Name: DefineUIName(a),
+		},
+	}
+
+	if len(a.Spec.UIRouteHostname) > 0 {
+		routeSpec.Host = a.Spec.UIRouteHostname
 	}
 
 	r = &routev1.Route{
@@ -87,14 +94,7 @@ func apicuritoRoute(a *api.Apicurito) (r resource.KubernetesResource) {
 				}),
 			},
 		},
-		Spec: routev1.RouteSpec{
-			Host: hostname,
-			TLS:  &routev1.TLSConfig{Termination: routev1.TLSTerminationEdge},
-			To: routev1.RouteTargetReference{
-				Kind: "Service",
-				Name: DefineUIName(a),
-			},
-		},
+		Spec: routeSpec,
 	}
 
 	return
