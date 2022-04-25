@@ -1,5 +1,5 @@
 bases:
 - ../operator
-- ../samples
+- ../samples/apicur_v1_apicurito_cr.yaml
 commonLabels:
   app: apicurito

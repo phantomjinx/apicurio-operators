@@ -277,7 +277,7 @@ func getComparator() compare.MapComparator {
 		pairs = append(pairs, [2]interface{}{configMap1.BinaryData, configMap2.BinaryData})
 		equal := compare.EqualPairs(pairs)
 		if !equal {
-			log.Info("Resources are not equal", "deployed", deployed, "requested", requested)
+			log.Info("Deployment different to requested resources so updating", "deployed", deployed, "requested", requested)
 		}
 		return equal
 	})
