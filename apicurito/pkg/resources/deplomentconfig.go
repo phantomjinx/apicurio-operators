@@ -40,9 +40,9 @@ func apicuritoDeployment(c *configuration.Config, a *api.Apicurito) (dep resourc
 		"component":     name,
 		"com.company":   "Red_Hat",
 		"rht.prod_name": "Red_Hat_Integration",
-		"rht.prod_ver":  version.Version,
+		"rht.prod_ver":  version.ShortVersion(),
 		"rht.comp":      "Fuse",
-		"rht.comp_ver":  version.Version,
+		"rht.comp_ver":  version.ShortVersion(),
 		"rht.subcomp":   name,
 		"rht.subcomp_t": "infrastructure",
 	}
@@ -139,9 +139,9 @@ func generatorDeployment(c *configuration.Config, a *api.Apicurito) (dep resourc
 		"component":     name,
 		"com.company":   "Red_Hat",
 		"rht.prod_name": "Red_Hat_Integration",
-		"rht.prod_ver":  version.Version,
+		"rht.prod_ver":  version.ShortVersion(),
 		"rht.comp":      "Fuse",
-		"rht.comp_ver":  version.Version,
+		"rht.comp_ver":  version.ShortVersion(),
 		"rht.subcomp":   name,
 		"rht.subcomp_t": "infrastructure",
 	}

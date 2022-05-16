@@ -12,3 +12,4 @@ init:
 	sed -i 's/$(TAG_VAR)/$(TAG)/' $(DEPLOYMENT).$(GEN).$(YAML)
 	sed -i 's~$(IMAGE_VAR)~$(IMAGE)~' $(DEPLOYMENT).$(GEN).$(YAML)
 	sed -i 's~$(VERSION_VAR)~$(VERSION)~' $(DEPLOYMENT).$(GEN).$(YAML)
+	sed -i 's~$(SHORT_VERSION_VAR)~$(SHORT_VERSION)~' $(DEPLOYMENT).$(GEN).$(YAML)

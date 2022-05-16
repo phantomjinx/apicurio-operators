@@ -80,7 +80,7 @@ var (
 		prometheus.GaugeOpts{
 			Name:        "apicurito_version_info",
 			Help:        "Apicurito operator information",
-			ConstLabels: prometheus.Labels{"operator_version": version.Version},
+			ConstLabels: prometheus.Labels{"operator_version": version.ShortVersion()},
 		},
 	)
 )
