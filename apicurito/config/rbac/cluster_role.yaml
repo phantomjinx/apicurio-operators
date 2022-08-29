@@ -20,3 +20,13 @@ rules:
   - deployments/finalizers
   verbs:
   - update
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes/custom-host
+  verbs:
+  - get
+  - create
+  - list
+  - update
+  - delete
