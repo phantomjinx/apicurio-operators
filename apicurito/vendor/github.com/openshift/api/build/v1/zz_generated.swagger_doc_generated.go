@@ -53,6 +53,20 @@ func (Build) SwaggerDoc() map[string]string {
 	return map_Build
 }
 
+var map_BuildCondition = map[string]string{
+	"":                   "BuildCondition describes the state of a build at a certain point.",
+	"type":               "Type of build condition.",
+	"status":             "Status of the condition, one of True, False, Unknown.",
+	"lastUpdateTime":     "The last time this condition was updated.",
+	"lastTransitionTime": "The last time the condition transitioned from one status to another.",
+	"reason":             "The reason for the condition's last transition.",
+	"message":            "A human readable message indicating details about the transition.",
+}
+
+func (BuildCondition) SwaggerDoc() map[string]string {
+	return map_BuildCondition
+}
+
 var map_BuildConfig = map[string]string{
 	"":       "Build configurations define a build process for new container images. There are three types of builds possible - a container image build using a Dockerfile, a Source-to-Image build that uses a specially prepared base image that accepts source code that it can make runnable, and a custom build that can run // arbitrary container images as a base and accept the build parameters. Builds run on the cluster and on completion are pushed to the container image registry specified in the \"output\" section. A build can be triggered via a webhook, when the base image changes, or when a user manually requests a new build be // created.\n\nEach build created by a build configuration is numbered and refers back to its parent configuration. Multiple builds can be triggered at once. Builds that do not have \"output\" set can be used to test code or run a verification build.",
 	"spec":   "spec holds all the input necessary to produce a new build, and the conditions when to trigger them.",
@@ -85,8 +99,9 @@ func (BuildConfigSpec) SwaggerDoc() map[string]string {
 }
 
 var map_BuildConfigStatus = map[string]string{
-	"":            "BuildConfigStatus contains current state of the build config object.",
-	"lastVersion": "lastVersion is used to inform about number of last triggered build.",
+	"":                    "BuildConfigStatus contains current state of the build config object.",
+	"lastVersion":         "lastVersion is used to inform about number of last triggered build.",
+	"imageChangeTriggers": "ImageChangeTriggers is used to capture the runtime state of any ImageChangeTrigger specified in the BuildConfigSpec, including the value reconciled by the OpenShift APIServer for the lastTriggeredImageID.  There will be a single entry in this array for each entry in the BuildConfigSpec.Triggers array where the BuildTriggerPolicy.ImageChange pointer is set to a non-nil value.  The logical key for each entry in this array is expressed by the ImageStreamTagReference type.  That type captures the required elements for identifying the ImageStreamTag referenced by the more generic ObjectReference BuildTriggerPolicy.ImageChange.From.",
 }
 
 func (BuildConfigStatus) SwaggerDoc() map[string]string {
@@ -111,17 +126,18 @@ func (BuildLog) SwaggerDoc() map[string]string {
 }
 
 var map_BuildLogOptions = map[string]string{
-	"":             "BuildLogOptions is the REST options for a build log",
-	"container":    "cointainer for which to stream logs. Defaults to only container if there is one container in the pod.",
-	"follow":       "follow if true indicates that the build log should be streamed until the build terminates.",
-	"previous":     "previous returns previous build logs. Defaults to false.",
-	"sinceSeconds": "sinceSeconds is a relative time in seconds before the current time from which to show logs. If this value precedes the time a pod was started, only logs since the pod start will be returned. If this value is in the future, no logs will be returned. Only one of sinceSeconds or sinceTime may be specified.",
-	"sinceTime":    "sinceTime is an RFC3339 timestamp from which to show logs. If this value precedes the time a pod was started, only logs since the pod start will be returned. If this value is in the future, no logs will be returned. Only one of sinceSeconds or sinceTime may be specified.",
-	"timestamps":   "timestamps, If true, add an RFC3339 or RFC3339Nano timestamp at the beginning of every line of log output. Defaults to false.",
-	"tailLines":    "tailLines, If set, is the number of lines from the end of the logs to show. If not specified, logs are shown from the creation of the container or sinceSeconds or sinceTime",
-	"limitBytes":   "limitBytes, If set, is the number of bytes to read from the server before terminating the log output. This may not display a complete final line of logging, and may return slightly more or slightly less than the specified limit.",
-	"nowait":       "noWait if true causes the call to return immediately even if the build is not available yet. Otherwise the server will wait until the build has started.",
-	"version":      "version of the build for which to view logs.",
+	"":                             "BuildLogOptions is the REST options for a build log",
+	"container":                    "cointainer for which to stream logs. Defaults to only container if there is one container in the pod.",
+	"follow":                       "follow if true indicates that the build log should be streamed until the build terminates.",
+	"previous":                     "previous returns previous build logs. Defaults to false.",
+	"sinceSeconds":                 "sinceSeconds is a relative time in seconds before the current time from which to show logs. If this value precedes the time a pod was started, only logs since the pod start will be returned. If this value is in the future, no logs will be returned. Only one of sinceSeconds or sinceTime may be specified.",
+	"sinceTime":                    "sinceTime is an RFC3339 timestamp from which to show logs. If this value precedes the time a pod was started, only logs since the pod start will be returned. If this value is in the future, no logs will be returned. Only one of sinceSeconds or sinceTime may be specified.",
+	"timestamps":                   "timestamps, If true, add an RFC3339 or RFC3339Nano timestamp at the beginning of every line of log output. Defaults to false.",
+	"tailLines":                    "tailLines, If set, is the number of lines from the end of the logs to show. If not specified, logs are shown from the creation of the container or sinceSeconds or sinceTime",
+	"limitBytes":                   "limitBytes, If set, is the number of bytes to read from the server before terminating the log output. This may not display a complete final line of logging, and may return slightly more or slightly less than the specified limit.",
+	"nowait":                       "noWait if true causes the call to return immediately even if the build is not available yet. Otherwise the server will wait until the build has started.",
+	"version":                      "version of the build for which to view logs.",
+	"insecureSkipTLSVerifyBackend": "insecureSkipTLSVerifyBackend indicates that the apiserver should not confirm the validity of the serving certificate of the backend it is connecting to.  This will make the HTTPS connection between the apiserver and the backend insecure. This means the apiserver cannot verify the log data it is receiving came from the real kubelet.  If the kubelet is configured to verify the apiserver's TLS credentials, it does not mean the connection to the real kubelet is vulnerable to a man in the middle attack (e.g. an attacker could not intercept the actual log data coming from the real kubelet).",
 }
 
 func (BuildLogOptions) SwaggerDoc() map[string]string {
@@ -207,6 +223,7 @@ var map_BuildStatus = map[string]string{
 	"output":                     "output describes the container image the build has produced.",
 	"stages":                     "stages contains details about each stage that occurs during the build including start time, duration (in milliseconds), and the steps that occured within each stage.",
 	"logSnippet":                 "logSnippet is the last few lines of the build log.  This value is only set for builds that failed.",
+	"conditions":                 "Conditions represents the latest available observations of a build's current state.",
 }
 
 func (BuildStatus) SwaggerDoc() map[string]string {
@@ -260,7 +277,7 @@ func (BuildTriggerCause) SwaggerDoc() map[string]string {
 
 var map_BuildTriggerPolicy = map[string]string{
 	"":            "BuildTriggerPolicy describes a policy for a single trigger that results in a new Build.",
-	"type":        "type is the type of build trigger",
+	"type":        "type is the type of build trigger. Valid values:\n\n- GitHub GitHubWebHookBuildTriggerType represents a trigger that launches builds on GitHub webhook invocations\n\n- Generic GenericWebHookBuildTriggerType represents a trigger that launches builds on generic webhook invocations\n\n- GitLab GitLabWebHookBuildTriggerType represents a trigger that launches builds on GitLab webhook invocations\n\n- Bitbucket BitbucketWebHookBuildTriggerType represents a trigger that launches builds on Bitbucket webhook invocations\n\n- ImageChange ImageChangeBuildTriggerType represents a trigger that launches builds on availability of a new version of an image\n\n- ConfigChange ConfigChangeBuildTriggerType will trigger a build on an initial build config creation WARNING: In the future the behavior will change to trigger a build on any config change",
 	"github":      "github contains the parameters for a GitHub webhook type of trigger",
 	"generic":     "generic contains the parameters for a Generic webhook type of trigger",
 	"imageChange": "imageChange contains parameters for an ImageChange type of trigger",
@@ -283,6 +300,7 @@ var map_CommonSpec = map[string]string{
 	"postCommit":                "postCommit is a build hook executed after the build output image is committed, before it is pushed to a registry.",
 	"completionDeadlineSeconds": "completionDeadlineSeconds is an optional duration in seconds, counted from the time when a build pod gets scheduled in the system, that the build may be active on a node before the system actively tries to terminate the build; value must be positive integer",
 	"nodeSelector":              "nodeSelector is a selector which must be true for the build pod to fit on a node If nil, it can be overridden by default build nodeselector values for the cluster. If set to an empty map or a map with any values, default build nodeselector values are ignored.",
+	"mountTrustedCA":            "mountTrustedCA bind mounts the cluster's trusted certificate authorities, as defined in the cluster's proxy configuration, into the build. This lets processes within a build trust components signed by custom PKI certificate authorities, such as private artifact repositories and HTTPS proxies.\n\nWhen this field is set to true, the contents of `/etc/pki/ca-trust` within the build are managed by the build container, and any changes to this directory or its subdirectories (for example - within a Dockerfile `RUN` instruction) are not persisted in the build's output image.",
 }
 
 func (CommonSpec) SwaggerDoc() map[string]string {
@@ -326,12 +344,12 @@ func (CustomBuildStrategy) SwaggerDoc() map[string]string {
 
 var map_DockerBuildStrategy = map[string]string{
 	"":                        "DockerBuildStrategy defines input parameters specific to container image build.",
-	"from":                    "from is reference to an DockerImage, ImageStreamTag, or ImageStreamImage from which the container image should be pulled the resulting image will be used in the FROM line of the Dockerfile for this build.",
+	"from":                    "from is a reference to an DockerImage, ImageStreamTag, or ImageStreamImage which overrides the FROM image in the Dockerfile for the build. If the Dockerfile uses multi-stage builds, this will replace the image in the last FROM directive of the file.",
 	"pullSecret":              "pullSecret is the name of a Secret that would be used for setting up the authentication for pulling the container images from the private Docker registries",
 	"noCache":                 "noCache if set to true indicates that the container image build must be executed with the --no-cache=true flag",
 	"env":                     "env contains additional environment variables you want to pass into a builder container.",
 	"forcePull":               "forcePull describes if the builder should pull the images from registry prior to building.",
-	"dockerfilePath":          "dockerfilePath is the path of the Dockerfile that will be used to build the container image, relative to the root of the context (contextDir).",
+	"dockerfilePath":          "dockerfilePath is the path of the Dockerfile that will be used to build the container image, relative to the root of the context (contextDir). Defaults to `Dockerfile` if unset.",
 	"buildArgs":               "buildArgs contains build arguments that will be resolved in the Dockerfile.  See https://docs.docker.com/engine/reference/builder/#/arg for more details.",
 	"imageOptimizationPolicy": "imageOptimizationPolicy describes what optimizations the system can use when building images to reduce the final size or time spent building the image. The default policy is 'None' which means the final build image will be equivalent to an image created by the container image build API. The experimental policy 'SkipLayers' will avoid commiting new layers in between each image step, and will fail if the Dockerfile cannot provide compatibility with the 'None' policy. An additional experimental policy 'SkipLayersAndWarn' is the same as 'SkipLayers' but simply warns if compatibility cannot be preserved.",
 }
@@ -441,13 +459,24 @@ func (ImageChangeCause) SwaggerDoc() map[string]string {
 
 var map_ImageChangeTrigger = map[string]string{
 	"":                     "ImageChangeTrigger allows builds to be triggered when an ImageStream changes",
-	"lastTriggeredImageID": "lastTriggeredImageID is used internally by the ImageChangeController to save last used image ID for build",
+	"lastTriggeredImageID": "lastTriggeredImageID is used internally by the ImageChangeController to save last used image ID for build This field is deprecated and will be removed in a future release. Deprecated",
 	"from":                 "from is a reference to an ImageStreamTag that will trigger a build when updated It is optional. If no From is specified, the From image from the build strategy will be used. Only one ImageChangeTrigger with an empty From reference is allowed in a build configuration.",
 	"paused":               "paused is true if this trigger is temporarily disabled. Optional.",
 }
 
 func (ImageChangeTrigger) SwaggerDoc() map[string]string {
 	return map_ImageChangeTrigger
+}
+
+var map_ImageChangeTriggerStatus = map[string]string{
+	"":                     "ImageChangeTriggerStatus tracks the latest resolved status of the associated ImageChangeTrigger policy specified in the BuildConfigSpec.Triggers struct.",
+	"lastTriggeredImageID": "lastTriggeredImageID represents, at the last time a Build for this BuildConfig was instantiated, the sha/id of the image referenced by the the ImageStreamTag cited in the 'from' of this struct. The lastTriggeredImageID field will be updated by the OpenShift APIServer on all instantiations of a Build from the BuildConfig it processes, regardless of what is considered the cause of instantiation. Specifically, an instantiation of a Build could have been manually requested, or could have resulted from changes with any of the Triggers defined in BuildConfigSpec.Triggers. The reason for always updating this field across all ImageChangeTriggerStatus instances is to prevent multiple builds being instantiated concurrently when multiple ImageChangeTriggers fire concurrently.  The system compares the the sha/id stored here with the associated ImageStreamTag's sha/id for the image.  If they match, then this trigger is not a valid reason for instantiating a Build.  So when ImageChangeTriggers fire concurrently, only one of them can \"win\", meaning selected as the cause for a Build instantiation request. Lastly, to clarify exactly what is meant by \"Build instantiation\", from a REST perspective, it is a HTTP POST of a BuildRequest object as the HTTP Body that is made to the OpenShift APIServer, where that HTTP POST also specifies the \"buildconfigs\" resource,  \"instantiate\" subresource, as well as the namespace and name of the BuildConfig.",
+	"from":                 "from is the ImageStreamTag that is used as the source of the trigger. This can come from an ImageStream tag referenced in this BuildConfig's Spec ImageChange Triggers, or the \"from\"\n this BuildConfig's build strategy if it happens to be an ImageStreamTag (where the user has specified an\nImageChange Trigger in the spec with a 'nil' for its 'from'.",
+	"lastTriggerTime":      "lastTriggerTime is the last time this particular ImageChangeTrigger fired, and that trigger firing was chosen as the cause for the Build being instantiated from this BuildConfig.  So on each Build instantiation, while lastTriggeredImageID will be updated regardless of whether this ImageChangeTrigger fired and deemed the cause for the Build Instantiation, this field is only updated when this trigger was in fact deemed the cause.  As such, it is valid that this field may not be set across all the ImageChangeTriggers, as they may have not yet been deemed to be the cause of a Build instantiation.  It is also valid that the times stored in lastTriggerTime will vary across all the ImageChangeTriggers, as the system explicitly picks only one trigger cause for a given Build.",
+}
+
+func (ImageChangeTriggerStatus) SwaggerDoc() map[string]string {
+	return map_ImageChangeTriggerStatus
 }
 
 var map_ImageLabel = map[string]string{
@@ -480,6 +509,16 @@ var map_ImageSourcePath = map[string]string{
 
 func (ImageSourcePath) SwaggerDoc() map[string]string {
 	return map_ImageSourcePath
+}
+
+var map_ImageStreamTagReference = map[string]string{
+	"":          "ImageStreamTagReference captures the required elements for identifying the ImageStreamTag referenced by the more generic ObjectReference BuildTriggerPolicy.ImageChange.From.  It is used by ImageChangeTriggerStatus, where a specific instance of ImageChangeTriggerStatus in maintained in BuildConfigStatus.ImageChangeTriggers for each entry in the BuildConfigSpec.Triggers array where the BuildTriggerPolicy.ImageChange pointer is set to a non-nil value",
+	"namespace": "namespace is the namespace where the ImageStreamTag used for an ImageChangeTrigger is located",
+	"name":      "name is the name of the ImageStreamTag used for an ImageChangeTrigger",
+}
+
+func (ImageStreamTagReference) SwaggerDoc() map[string]string {
+	return map_ImageStreamTagReference
 }
 
 var map_JenkinsPipelineBuildStrategy = map[string]string{

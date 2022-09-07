@@ -1,7 +1,5 @@
 package apicurito
 
-//go:generate go run ./.packr/packr.go
-
 import (
 	"context"
 	"fmt"
@@ -10,10 +8,10 @@ import (
 	"github.com/RHsyseng/operator-utils/pkg/logs"
 	"github.com/RHsyseng/operator-utils/pkg/utils/kubernetes"
 	"github.com/RHsyseng/operator-utils/pkg/utils/openshift"
+	"github.com/apicurio/apicurio-operators/apicurito/config"
 	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
 	"github.com/apicurio/apicurio-operators/apicurito/pkg/resources"
 	"github.com/ghodss/yaml"
-	"github.com/gobuffalo/packr/v2"
 	consolev1 "github.com/openshift/api/console/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -132,35 +130,41 @@ func ConsoleYAMLSampleExists() error {
 
 func createConsoleYAMLSamples(c client.Client) {
 	logu.Info("Loading CR YAML samples.")
-	box := packr.New("cryamlsamples", "../../../deploy/crs")
-	if box.List() == nil {
-		logu.Error(nil, "CR YAML folder is empty. It is not loaded.")
+	apicuritoCR := "samples/apicur_v1_apicurito_cr.yaml"
+	asset, err := config.Asset(apicuritoCR)
+	logu.Info("Sample:", apicuritoCR, string(asset))
+
+	if err != nil {
+		logu.Info("yaml", " name: ", apicuritoCR, " not created:  ", err.Error())
 		return
 	}
-	for _, filename := range box.List() {
-		yamlStr, err := box.FindString(filename)
-		if err != nil {
-			logu.Info("yaml", " name: ", filename, " not created:  ", err.Error())
-			continue
-		}
-		apicurito := api.Apicurito{}
-		err = yaml.Unmarshal([]byte(yamlStr), &apicurito)
-		if err != nil {
-			logu.Info("yaml", " name: ", filename, " not created:  ", err.Error())
-			continue
-		}
-		yamlSample, err := openshift.GetConsoleYAMLSample(&apicurito)
-		if err != nil {
-			logu.Info("yaml", " name: ", filename, " not created:  ", err.Error())
-			continue
-		}
-		err = c.Create(context.TODO(), yamlSample)
-		if err != nil {
-			if !apierrors.IsAlreadyExists(err) {
-				logu.Info("yaml", " name: ", filename, " not created:+", err.Error())
-			}
-			continue
-		}
-		logu.Info("yaml", " name: ", filename, " Created.")
+
+	logu.Info("Unmarshalling samples.")
+	apicurito := api.Apicurito{}
+	err = yaml.Unmarshal(asset, &apicurito)
+	if err != nil {
+		logu.Info("yaml", " name: ", apicuritoCR, " not created:  ", err.Error())
+		return
 	}
+
+	logu.Info("Loading sample into openshift console")
+	yamlSample, err := openshift.GetConsoleYAMLSample(&apicurito)
+	if err != nil {
+		logu.Info("yaml", " name: ", apicuritoCR, " not created:  ", err.Error())
+		return
+	}
+
+	logu.Info("Resource being created: ")
+	logu.Info(yamlSample)
+	err = c.Create(context.TODO(), yamlSample)
+	if err != nil {
+		if !apierrors.IsAlreadyExists(err) {
+			logu.Info("yaml", " name: ", apicuritoCR, " not created:+", err.Error())
+		} else {
+			logu.Info("yaml", " name: ", apicuritoCR, " already created.")
+		}
+		return
+	}
+
+	logu.Info("yaml", " name: ", apicuritoCR, " Created.")
 }

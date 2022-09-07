@@ -17,15 +17,14 @@
 package resources
 
 import (
-	"github.com/RHsyseng/operator-utils/pkg/resource"
-
 	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func generatorRoute(a *api.Apicurito) (r resource.KubernetesResource) {
+func generatorRoute(a *api.Apicurito) (r client.Object) {
 
 	routeSpec := routev1.RouteSpec{
 		Path: "/api/v1",
@@ -63,7 +62,7 @@ func generatorRoute(a *api.Apicurito) (r resource.KubernetesResource) {
 	return
 }
 
-func apicuritoRoute(a *api.Apicurito) (r resource.KubernetesResource) {
+func apicuritoRoute(a *api.Apicurito) (r client.Object) {
 
 	routeSpec := routev1.RouteSpec{
 		TLS: &routev1.TLSConfig{Termination: routev1.TLSTerminationEdge},

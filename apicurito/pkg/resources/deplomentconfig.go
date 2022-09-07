@@ -17,8 +17,6 @@
 package resources
 
 import (
-	"github.com/RHsyseng/operator-utils/pkg/resource"
-
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
@@ -28,10 +26,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Creates and returns a apicurito Deployment object
-func apicuritoDeployment(c *configuration.Config, a *api.Apicurito) (dep resource.KubernetesResource) {
+func apicuritoDeployment(c *configuration.Config, a *api.Apicurito) (dep client.Object) {
 	// Define a new deployment
 	var dm int32 = 420
 	name := DefineUIName(a)
@@ -131,7 +130,7 @@ func apicuritoDeployment(c *configuration.Config, a *api.Apicurito) (dep resourc
 }
 
 // Creates and returns a generator Deployment object
-func generatorDeployment(c *configuration.Config, a *api.Apicurito) (dep resource.KubernetesResource) {
+func generatorDeployment(c *configuration.Config, a *api.Apicurito) (dep client.Object) {
 	// Define a new deployment
 	name := DefineGeneratorName(a)
 	deployLabels := map[string]string{

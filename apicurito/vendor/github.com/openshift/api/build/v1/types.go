@@ -35,7 +35,7 @@ type BuildSpec struct {
 
 	// triggeredBy describes which triggers started the most recent update to the
 	// build configuration and contains information about those triggers.
-	TriggeredBy []BuildTriggerCause `json:"triggeredBy" protobuf:"bytes,2,rep,name=triggeredBy"`
+	TriggeredBy []BuildTriggerCause `json:"triggeredBy,omitempty" protobuf:"bytes,2,rep,name=triggeredBy"`
 }
 
 // OptionalNodeSelector is a map that may also be left nil to distinguish between set and unset.
@@ -86,6 +86,16 @@ type CommonSpec struct {
 	// are ignored.
 	// +optional
 	NodeSelector OptionalNodeSelector `json:"nodeSelector" protobuf:"bytes,9,name=nodeSelector"`
+
+	// mountTrustedCA bind mounts the cluster's trusted certificate authorities, as defined in
+	// the cluster's proxy configuration, into the build. This lets processes within a build trust
+	// components signed by custom PKI certificate authorities, such as private artifact
+	// repositories and HTTPS proxies.
+	//
+	// When this field is set to true, the contents of `/etc/pki/ca-trust` within the build are
+	// managed by the build container, and any changes to this directory or its subdirectories (for
+	// example - within a Dockerfile `RUN` instruction) are not persisted in the build's output image.
+	MountTrustedCA *bool `json:"mountTrustedCA,omitempty" protobuf:"varint,10,opt,name=mountTrustedCA"`
 }
 
 // BuildTriggerCause holds information about a triggered build. It is used for
@@ -220,6 +230,11 @@ type BuildStatus struct {
 
 	// logSnippet is the last few lines of the build log.  This value is only set for builds that failed.
 	LogSnippet string `json:"logSnippet,omitempty" protobuf:"bytes,12,opt,name=logSnippet"`
+
+	// Conditions represents the latest available observations of a build's current state.
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	Conditions []BuildCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,13,rep,name=conditions"`
 }
 
 // StageInfo contains details about a build stage.
@@ -333,6 +348,24 @@ const (
 	BuildPhaseCancelled BuildPhase = "Cancelled"
 )
 
+type BuildConditionType string
+
+// BuildCondition describes the state of a build at a certain point.
+type BuildCondition struct {
+	// Type of build condition.
+	Type BuildConditionType `json:"type" protobuf:"bytes,1,opt,name=type,casttype=BuildConditionType"`
+	// Status of the condition, one of True, False, Unknown.
+	Status corev1.ConditionStatus `json:"status" protobuf:"bytes,2,opt,name=status,casttype=k8s.io/kubernetes/pkg/api/v1.ConditionStatus"`
+	// The last time this condition was updated.
+	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty" protobuf:"bytes,6,opt,name=lastUpdateTime"`
+	// The last time the condition transitioned from one status to another.
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty" protobuf:"bytes,3,opt,name=lastTransitionTime"`
+	// The reason for the condition's last transition.
+	Reason string `json:"reason,omitempty" protobuf:"bytes,4,opt,name=reason"`
+	// A human readable message indicating details about the transition.
+	Message string `json:"message,omitempty" protobuf:"bytes,5,opt,name=message"`
+}
+
 // StatusReason is a brief CamelCase string that describes a temporary or
 // permanent build error condition, meant for machine parsing and tidy display
 // in the CLI.
@@ -377,7 +410,8 @@ const (
 type BuildSource struct {
 	// type of build input to accept
 	// +k8s:conversion-gen=false
-	Type BuildSourceType `json:"type" protobuf:"bytes,1,opt,name=type,casttype=BuildSourceType"`
+	// +optional
+	Type BuildSourceType `json:"type,omitempty" protobuf:"bytes,1,opt,name=type,casttype=BuildSourceType"`
 
 	// binary builds accept a binary as their input. The binary is generally assumed to be a tar,
 	// gzipped tar, or zip file depending on the strategy. For container image builds, this is the build
@@ -441,13 +475,13 @@ type ImageSource struct {
 	// does not reference an image source it is ignored. This field and paths may both be set, in which case
 	// the contents will be used twice.
 	// +optional
-	As []string `json:"as" protobuf:"bytes,4,rep,name=as"`
+	As []string `json:"as,omitempty" protobuf:"bytes,4,rep,name=as"`
 
 	// paths is a list of source and destination paths to copy from the image. This content will be copied
 	// into the build context prior to starting the build. If no paths are set, the build context will
 	// not be altered.
 	// +optional
-	Paths []ImageSourcePath `json:"paths" protobuf:"bytes,2,rep,name=paths"`
+	Paths []ImageSourcePath `json:"paths,omitempty" protobuf:"bytes,2,rep,name=paths"`
 
 	// pullSecret is a reference to a secret to be used to pull the image from a registry
 	// If the image is pulled from the OpenShift registry, this field does not need to be set.
@@ -580,7 +614,8 @@ type SourceControlUser struct {
 type BuildStrategy struct {
 	// type is the kind of build strategy.
 	// +k8s:conversion-gen=false
-	Type BuildStrategyType `json:"type" protobuf:"bytes,1,opt,name=type,casttype=BuildStrategyType"`
+	// +optional
+	Type BuildStrategyType `json:"type,omitempty" protobuf:"bytes,1,opt,name=type,casttype=BuildStrategyType"`
 
 	// dockerStrategy holds the parameters to the container image build strategy.
 	DockerStrategy *DockerBuildStrategy `json:"dockerStrategy,omitempty" protobuf:"bytes,2,opt,name=dockerStrategy"`
@@ -668,9 +703,9 @@ const (
 
 // DockerBuildStrategy defines input parameters specific to container image build.
 type DockerBuildStrategy struct {
-	// from is reference to an DockerImage, ImageStreamTag, or ImageStreamImage from which
-	// the container image should be pulled
-	// the resulting image will be used in the FROM line of the Dockerfile for this build.
+	// from is a reference to an DockerImage, ImageStreamTag, or ImageStreamImage which overrides
+	// the FROM image in the Dockerfile for the build. If the Dockerfile uses multi-stage builds,
+	// this will replace the image in the last FROM directive of the file.
 	From *corev1.ObjectReference `json:"from,omitempty" protobuf:"bytes,1,opt,name=from"`
 
 	// pullSecret is the name of a Secret that would be used for setting up
@@ -690,6 +725,7 @@ type DockerBuildStrategy struct {
 
 	// dockerfilePath is the path of the Dockerfile that will be used to build the container image,
 	// relative to the root of the context (contextDir).
+	// Defaults to `Dockerfile` if unset.
 	DockerfilePath string `json:"dockerfilePath,omitempty" protobuf:"bytes,6,opt,name=dockerfilePath"`
 
 	// buildArgs contains build arguments that will be resolved in the Dockerfile.  See
@@ -894,7 +930,8 @@ type BuildConfigSpec struct {
 	//triggers determine how new Builds can be launched from a BuildConfig. If
 	//no triggers are defined, a new build can only occur as a result of an
 	//explicit client build creation.
-	Triggers []BuildTriggerPolicy `json:"triggers" protobuf:"bytes,1,rep,name=triggers"`
+	// +optional
+	Triggers []BuildTriggerPolicy `json:"triggers,omitempty" protobuf:"bytes,1,rep,name=triggers"`
 
 	// RunPolicy describes how the new build created from this build
 	// configuration will be scheduled for execution.
@@ -938,6 +975,14 @@ const (
 type BuildConfigStatus struct {
 	// lastVersion is used to inform about number of last triggered build.
 	LastVersion int64 `json:"lastVersion" protobuf:"varint,1,opt,name=lastVersion"`
+
+	// ImageChangeTriggers is used to capture the runtime state of any ImageChangeTrigger specified in the BuildConfigSpec,
+	// including the value reconciled by the OpenShift APIServer for the lastTriggeredImageID.  There will be a single entry
+	// in this array for each entry in the BuildConfigSpec.Triggers array where the BuildTriggerPolicy.ImageChange
+	// pointer is set to a non-nil value.  The logical key for each entry in this array is expressed by the
+	// ImageStreamTagReference type.  That type captures the required elements for identifying the ImageStreamTag referenced by the more
+	// generic ObjectReference BuildTriggerPolicy.ImageChange.From.
+	ImageChangeTriggers []ImageChangeTriggerStatus `json:"imageChangeTriggers,omitempty" protobuf:"bytes,2,rep,name=imageChangeTriggers"`
 }
 
 // SecretLocalReference contains information that points to the local secret being used
@@ -967,6 +1012,8 @@ type WebHookTrigger struct {
 type ImageChangeTrigger struct {
 	// lastTriggeredImageID is used internally by the ImageChangeController to save last
 	// used image ID for build
+	// This field is deprecated and will be removed in a future release.
+	// Deprecated
 	LastTriggeredImageID string `json:"lastTriggeredImageID,omitempty" protobuf:"bytes,1,opt,name=lastTriggeredImageID"`
 
 	// from is a reference to an ImageStreamTag that will trigger a build when updated
@@ -979,9 +1026,80 @@ type ImageChangeTrigger struct {
 	Paused bool `json:"paused,omitempty" protobuf:"varint,3,opt,name=paused"`
 }
 
+// ImageStreamTagReference captures the required elements for identifying the ImageStreamTag referenced by the more
+// generic ObjectReference BuildTriggerPolicy.ImageChange.From.  It is used by ImageChangeTriggerStatus, where a
+// specific instance of ImageChangeTriggerStatus in maintained in BuildConfigStatus.ImageChangeTriggers for each entry
+// in the BuildConfigSpec.Triggers array where the BuildTriggerPolicy.ImageChange pointer is set to a non-nil value
+type ImageStreamTagReference struct {
+	// namespace is the namespace where the ImageStreamTag used for an ImageChangeTrigger is located
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,1,opt,name=namespace"`
+
+	// name is the name of the ImageStreamTag used for an ImageChangeTrigger
+	Name string `json:"name,omitempty" protobuf:"bytes,2,opt,name=name"`
+}
+
+// ImageChangeTriggerStatus tracks the latest resolved status of the associated ImageChangeTrigger policy
+// specified in the BuildConfigSpec.Triggers struct.
+type ImageChangeTriggerStatus struct {
+	// lastTriggeredImageID represents, at the last time a Build for this BuildConfig was instantiated, the sha/id of
+	// the image referenced by the the ImageStreamTag cited in the 'from' of this struct.
+	// The lastTriggeredImageID field will be updated by the OpenShift APIServer on all instantiations of a Build from
+	// the BuildConfig it processes, regardless of what is considered the cause of instantiation.
+	// Specifically, an instantiation of a Build could have been manually requested, or could have resulted from
+	// changes with any of the Triggers defined in BuildConfigSpec.Triggers.
+	// The reason for always updating this field across all ImageChangeTriggerStatus instances is to prevent
+	// multiple builds being instantiated concurrently when multiple ImageChangeTriggers fire concurrently.  The system
+	// compares the the sha/id stored here with the associated ImageStreamTag's sha/id for the image.  If they match,
+	// then this trigger is not a valid reason for instantiating a Build.  So when ImageChangeTriggers fire concurrently,
+	// only one of them can "win", meaning selected as the cause for a Build instantiation request.
+	// Lastly, to clarify exactly what is meant by "Build instantiation", from a REST perspective, it is a HTTP POST of a
+	// BuildRequest object as the HTTP Body that is made to the OpenShift APIServer, where that HTTP POST also specifies
+	// the "buildconfigs" resource,  "instantiate" subresource, as well as the namespace and name of the BuildConfig.
+	LastTriggeredImageID string `json:"lastTriggeredImageID,omitempty" protobuf:"bytes,1,opt,name=lastTriggeredImageID"`
+
+	// from is the ImageStreamTag that is used as the source of the trigger.
+	// This can come from an ImageStream tag referenced in this BuildConfig's Spec ImageChange Triggers, or the "from"
+	//  this BuildConfig's build strategy if it happens to be an ImageStreamTag (where the user has specified an
+	// ImageChange Trigger in the spec with a 'nil' for its 'from'.
+	From ImageStreamTagReference `json:"from,omitempty" protobuf:"bytes,2,opt,name=from"`
+
+	// lastTriggerTime is the last time this particular ImageChangeTrigger fired, and that trigger firing was chosen as the cause for the Build being instantiated
+	// from this BuildConfig.  So on each Build instantiation, while lastTriggeredImageID will be updated regardless of
+	// whether this ImageChangeTrigger fired and deemed the cause for the Build Instantiation, this field is only updated
+	// when this trigger was in fact deemed the cause.  As such, it is valid that this field may not be set across all the
+	// ImageChangeTriggers, as they may have not yet been deemed to be the cause of a Build instantiation.  It is also
+	// valid that the times stored in lastTriggerTime will vary across all the ImageChangeTriggers, as the system
+	// explicitly picks only one trigger cause for a given Build.
+	LastTriggerTime metav1.Time `json:"lastTriggerTime,omitempty" protobuf:"bytes,3,opt,name=lastTriggerTime"`
+}
+
 // BuildTriggerPolicy describes a policy for a single trigger that results in a new Build.
 type BuildTriggerPolicy struct {
-	// type is the type of build trigger
+	// type is the type of build trigger. Valid values:
+	//
+	// - GitHub
+	// GitHubWebHookBuildTriggerType represents a trigger that launches builds on
+	// GitHub webhook invocations
+	//
+	// - Generic
+	// GenericWebHookBuildTriggerType represents a trigger that launches builds on
+	// generic webhook invocations
+	//
+	// - GitLab
+	// GitLabWebHookBuildTriggerType represents a trigger that launches builds on
+	// GitLab webhook invocations
+	//
+	// - Bitbucket
+	// BitbucketWebHookBuildTriggerType represents a trigger that launches builds on
+	// Bitbucket webhook invocations
+	//
+	// - ImageChange
+	// ImageChangeBuildTriggerType represents a trigger that launches builds on
+	// availability of a new version of an image
+	//
+	// - ConfigChange
+	// ConfigChangeBuildTriggerType will trigger a build on an initial build config creation
+	// WARNING: In the future the behavior will change to trigger a build on any config change
 	Type BuildTriggerType `json:"type" protobuf:"bytes,1,opt,name=type,casttype=BuildTriggerType"`
 
 	// github contains the parameters for a GitHub webhook type of trigger
@@ -1141,7 +1259,7 @@ type BuildRequest struct {
 
 	// triggeredBy describes which triggers started the most recent update to the
 	// build configuration and contains information about those triggers.
-	TriggeredBy []BuildTriggerCause `json:"triggeredBy" protobuf:"bytes,8,rep,name=triggeredBy"`
+	TriggeredBy []BuildTriggerCause `json:"triggeredBy,omitempty" protobuf:"bytes,8,rep,name=triggeredBy"`
 
 	// DockerStrategyOptions contains additional docker-strategy specific options for the build
 	DockerStrategyOptions *DockerStrategyOptions `json:"dockerStrategyOptions,omitempty" protobuf:"bytes,9,opt,name=dockerStrategyOptions"`
@@ -1222,6 +1340,15 @@ type BuildLogOptions struct {
 
 	// version of the build for which to view logs.
 	Version *int64 `json:"version,omitempty" protobuf:"varint,10,opt,name=version"`
+
+	// insecureSkipTLSVerifyBackend indicates that the apiserver should not confirm the validity of the
+	// serving certificate of the backend it is connecting to.  This will make the HTTPS connection between the apiserver
+	// and the backend insecure. This means the apiserver cannot verify the log data it is receiving came from the real
+	// kubelet.  If the kubelet is configured to verify the apiserver's TLS credentials, it does not mean the
+	// connection to the real kubelet is vulnerable to a man in the middle attack (e.g. an attacker could not intercept
+	// the actual log data coming from the real kubelet).
+	// +optional
+	InsecureSkipTLSVerifyBackend bool `json:"insecureSkipTLSVerifyBackend,omitempty" protobuf:"varint,11,opt,name=insecureSkipTLSVerifyBackend"`
 }
 
 // SecretSpec specifies a secret to be included in a build pod and its corresponding mount point

@@ -19,18 +19,17 @@ package resources
 import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/RHsyseng/operator-utils/pkg/resource"
-
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	api "github.com/apicurio/apicurio-operators/apicurito/pkg/apis/apicur/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var labels = map[string]string{"app": "apicurito"}
 
-func apicuritoService(a *api.Apicurito) (s resource.KubernetesResource) {
+func apicuritoService(a *api.Apicurito) (s client.Object) {
 
 	// Define new service
 	name := DefineUIName(a)
@@ -67,7 +66,7 @@ func apicuritoService(a *api.Apicurito) (s resource.KubernetesResource) {
 	return
 }
 
-func generatorService(a *api.Apicurito) (s resource.KubernetesResource) {
+func generatorService(a *api.Apicurito) (s client.Object) {
 	name := DefineGeneratorName(a)
 	s = &corev1.Service{
 		TypeMeta: metav1.TypeMeta{

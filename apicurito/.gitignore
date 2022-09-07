@@ -1,8 +1,6 @@
 # Temporary Build Files
 build/_output
-build/_test
-*-packr.go
-pkg/controller/apicurito/packrd
+build/_testd
 # Created by https://www.gitignore.io/api/go,vim,emacs,visualstudiocode
 ### Emacs ###
 # -*- mode: gitignore; -*-
