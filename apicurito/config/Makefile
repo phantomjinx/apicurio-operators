@@ -215,7 +215,7 @@ bundle-push: bundle-build
 catalog: opm bundle-push
 	SRC_CATALOG=$(SRC_CATALOG) CATALOG_DIR=$(CATALOG) \
 	OPM=$(OPM) BUNDLE_IMAGE=$(BUNDLE_IMG) CSV_NAME=$(CSV_NAME) \
-	CSV_REPLACES=$(CSV_REPLACES) CHANNEL=$(DEFAULT_CHANNEL) \
+	CSV_REPLACES=$(CSV_REPLACES) CHANNEL=$(DEFAULT_CHANNEL)-dev \
 	PACKAGE=$(PACKAGE) ./script/build-catalog.sh
 
 clean:

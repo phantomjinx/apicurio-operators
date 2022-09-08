@@ -43,9 +43,13 @@ check_env_var "VERSION" ${VERSION}
 sed -i "s/Version      = .*/Version      = \"${VERSION}\""/ version/version.go
 sed -i "s/PriorVersion = .*/PriorVersion = \"${PREV_VERSION}\""/ version/version.go
 
+echo "Updating vendor directory ..."
 go mod vendor
+
+echo "Run generators ..."
 go generate ./...
 
+echo "Executing test build ..."
 ./scripts/go-test.sh
 
 echo
