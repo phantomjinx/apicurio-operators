@@ -1,10 +1,10 @@
 
 # Red Hat Openshift Labels
 LABEL com.redhat.delivery.operator.bundle=true
-LABEL com.redhat.openshift.versions="v4.6"
+LABEL com.redhat.openshift.versions="v4.10"
 
 LABEL name="fuse7/fuse-apicurito-rhel8-operator-metadata" \
-      version="1.11.1" \
+      version="1.12.0" \
       maintainer="Otavio Piske <opiske@redhat.com>" \
       summary="Operator which manages the lifecycle of the Apicurito application." \
       description="Operator which manages the lifecycle of the Apicurito application." \
