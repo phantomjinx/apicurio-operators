@@ -111,7 +111,7 @@ func (c *Config) setPropertiesFromEnv() (err error) {
 	return
 }
 
-//GetImage
+// GetImage
 func GetImage(imageURL string) (image, imageTag, imageContext string) {
 	urlParts := strings.Split(imageURL, "/")
 	if len(urlParts) > 1 {

@@ -92,9 +92,22 @@ func schema_pkg_apis_apicur_v1_ApicuritoSpec(ref common.ReferenceCallback) commo
 				Properties: map[string]spec.Schema{
 					"size": {
 						SchemaProps: spec.SchemaProps{
-							Default: 0,
-							Type:    []string{"integer"},
-							Format:  "int32",
+							Description: "Number of pods to scale",
+							Default:     0,
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"resourcesUI": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Resources for the UI pod",
+							Ref:         ref("k8s.io/api/core/v1.ResourceRequirements"),
+						},
+					},
+					"resourcesGenerator": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Resources for the generator pod",
+							Ref:         ref("k8s.io/api/core/v1.ResourceRequirements"),
 						},
 					},
 					"uiRouteHostname": {
@@ -115,6 +128,8 @@ func schema_pkg_apis_apicur_v1_ApicuritoSpec(ref common.ReferenceCallback) commo
 				Required: []string{"size"},
 			},
 		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.ResourceRequirements"},
 	}
 }
 

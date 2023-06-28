@@ -17,6 +17,7 @@
 package v1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -26,10 +27,21 @@ import (
 // ApicuritoSpec defines the desired state of Apicurito
 // +k8s:openapi-gen=true
 type ApicuritoSpec struct {
+	// Number of pods to scale
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="Size"
 	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors="urn:alm:descriptor:com.tectonic.ui:number"
 	Size int32 `json:"size"`
+
+	// Resources for the UI pod
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="ResourcesUI"
+	ResourcesUI *corev1.ResourceRequirements `json:"resourcesUI,omitempty"`
+
+	// Resources for the generator pod
+	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,displayName="ResourcesGenerator"
+	ResourcesGenerator *corev1.ResourceRequirements `json:"resourcesGenerator,omitempty"`
 
 	// The external hostname to access the UI service
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
