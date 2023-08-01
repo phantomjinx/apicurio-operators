@@ -6,9 +6,9 @@ SRC_CATALOG := registry.redhat.io/redhat/redhat-operator-index:v4.11
 
 PACKAGE := fuse-apicurito
 
-DEFAULT_VERSION := 7.12.0
-DEFAULT_PREVIOUS_VERSION := 7.11.1
-DEFAULT_TAG := 1.12
+DEFAULT_VERSION := 7.13.0
+DEFAULT_PREVIOUS_VERSION := 7.12.0
+DEFAULT_TAG := 1.13
 DEFAULT_IMAGE := registry-proxy.engineering.redhat.com/rh-osbs/fuse7-fuse-apicurito-rhel8-operator
 DEFAULT_NAMESPACE := $(shell $(CONFIG_DIR)/script/namespace.sh)
 DEFAULT_CHANNEL := $(PACKAGE)-$(shell v=$(DEFAULT_VERSION) && echo "$${v%\.[0-9]}.x")
